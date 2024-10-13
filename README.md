@@ -4,15 +4,14 @@ A project for CSC-207.
 
 Authors:
 
-* Your Name Here
+* David William Stroud
 * Samuel A. Rebelsky (starter code)
 
 ---
 
 Overview:
 
-PLEASE PROVIDE AN OVERVIEW OF THE PROJECT FOR THOSE WHO MIGHT NOT
-OTHERWISE UNDERSTAND IT.
+This project implements a matrix (i.e. a 2-dimensional array) in Java.
 
 ---
 
