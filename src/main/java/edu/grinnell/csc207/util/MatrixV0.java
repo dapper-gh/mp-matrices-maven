@@ -82,7 +82,7 @@ public class MatrixV0<T> implements Matrix<T> {
 
     this.width = width1;
     this.height = height1;
-    this.backing = (T[]) new Object[this.getExpectedSize()];
+    this.backing = (T[]) new Object[this.width() * this.height()];
   } // MatrixV0
 
   // +--------------+------------------------------------------------
@@ -151,11 +151,7 @@ public class MatrixV0<T> implements Matrix<T> {
    *   If the row is negative or greater than the height.
    */
   public void insertRow(int row) {
-    try {
-      this.insertRow(row, this.defaultRun(this.width()));
-    } catch (ArraySizeException err) {
-      // This will never happen, so we will fail silently.
-    } // try-catch
+    this.insertRowUnchecked(row, this.defaultRun(this.width()));
   } // insertRow(int)
 
   /**
@@ -171,7 +167,6 @@ public class MatrixV0<T> implements Matrix<T> {
    * @throws ArraySizeException
    *   If the size of vals is not the same as the width of the matrix.
    */
-  @SuppressWarnings({ "unchecked" })
   public void insertRow(int row, T[] vals) throws ArraySizeException {
     if (vals.length != this.width()) {
       throw new ArraySizeException(
@@ -182,40 +177,7 @@ public class MatrixV0<T> implements Matrix<T> {
       );
     } // if
 
-    if (row < 0 || row > this.height()) {
-      throw new ArrayIndexOutOfBoundsException(
-              "Row index "
-                      + row
-                      + " not valid for Matrix of height "
-                      + this.height()
-      );
-    } // if
-
-    T[] newBacking = (T[]) new Object[this.getExpectedSize() + this.width()];
-
-    int numBefore = row == this.height() ? this.backing.length : this.getIndex(row, 0);
-
-    System.arraycopy(
-            this.backing,
-            0,
-            newBacking,
-            0,
-            numBefore
-    );
-    System.arraycopy(
-            this.backing,
-            numBefore,
-            newBacking,
-            numBefore + this.width(),
-            newBacking.length - numBefore - this.width()
-    );
-
-    this.backing = newBacking;
-    this.height++;
-
-    for (int i = 0; i < this.width(); i++) {
-      this.set(row, i, vals[i]);
-    } // for
+    this.insertRowUnchecked(row, vals);
   } // insertRow(int, T[])
 
   /**
@@ -228,11 +190,7 @@ public class MatrixV0<T> implements Matrix<T> {
    *   If the column is negative or greater than the width.
    */
   public void insertCol(int col) {
-    try {
-      this.insertCol(col, this.defaultRun(this.height()));
-    } catch (ArraySizeException err) {
-      // This will never happen, so we will fail silently.
-    } // try-catch
+    this.insertColUnchecked(col, this.defaultRun(this.height()));
   } // insertCol(int)
 
   /**
@@ -248,7 +206,6 @@ public class MatrixV0<T> implements Matrix<T> {
    * @throws ArraySizeException
    *   If the size of vals is not the same as the height of the matrix.
    */
-  @SuppressWarnings({ "unchecked" })
   public void insertCol(int col, T[] vals) throws ArraySizeException {
     if (vals.length != this.height()) {
       throw new ArraySizeException(
@@ -259,40 +216,7 @@ public class MatrixV0<T> implements Matrix<T> {
       );
     } // if
 
-    if (col < 0 || col > this.width()) {
-      throw new IndexOutOfBoundsException(
-              "Column index "
-                      + col
-                      + " is not appropriate for Matrix of width "
-                      + this.width()
-      );
-    } // if
-
-    T[] newBacking = (T[]) new Object[this.getExpectedSize() + this.height()];
-
-    for (int i = 0; i < this.height(); i++) {
-      System.arraycopy(
-              this.backing,
-              i * this.width(),
-              newBacking,
-              i * this.width() + i,
-              col
-      );
-      System.arraycopy(
-              this.backing,
-              i * this.width() + col,
-              newBacking,
-              i * this.width() + i + col + 1,
-              this.width() - col
-      );
-    } // for
-
-    this.backing = newBacking;
-    this.width++;
-
-    for (int i = 0; i < this.height(); i++) {
-      this.set(i, col, vals[i]);
-    } // for
+    this.insertColUnchecked(col, vals);
   } // insertCol(int, T[])
 
   /**
@@ -315,7 +239,7 @@ public class MatrixV0<T> implements Matrix<T> {
       );
     } // if
 
-    T[] newBacking = (T[]) new Object[this.getExpectedSize() - this.width()];
+    T[] newBacking = (T[]) new Object[this.backing.length - this.width()];
 
     int numBefore = row * this.width();
     System.arraycopy(
@@ -357,7 +281,7 @@ public class MatrixV0<T> implements Matrix<T> {
       );
     } // if
 
-    T[] newBacking = (T[]) new Object[this.getExpectedSize() - this.height()];
+    T[] newBacking = (T[]) new Object[this.backing.length - this.height()];
 
     for (int i = 0; i < this.height(); i++) {
       System.arraycopy(
@@ -394,7 +318,7 @@ public class MatrixV0<T> implements Matrix<T> {
    * @param val
    *   The value to store.
    *
-   * @throw IndexOutOfBoundsException
+   * @throws IndexOutOfBoundsException
    *   If the rows or columns are inappropriate.
    */
   public void fillRegion(int startRow, int startCol, int endRow, int endCol,
@@ -542,15 +466,6 @@ public class MatrixV0<T> implements Matrix<T> {
   } // getIndex(int, int)
 
   /**
-   * This method calculates the appropriate length of the backing array,
-   * given the width and height of this matrix.
-   * @return The expected size of the backing array.
-   */
-  int getExpectedSize() {
-    return this.width() * this.height();
-  } // getExpectedSize()
-
-  /**
    * This method creates an array of length len
    * with every index set to the default value of this matrix.
    *
@@ -566,4 +481,101 @@ public class MatrixV0<T> implements Matrix<T> {
     } // for
     return arr;
   } // defaultRun(int)
+
+  /**
+   * Inserts a row into this matrix at the specified position and fills it
+   * with the specified values. For a call to this method to be valid,
+   * vals must have a length equal to the width of the matrix.
+   * @param row The position at which to insert this row.
+   * @param vals The values to use when filling the inserted row.
+   *
+   * @throws IndexOutOfBoundsException This is thrown if the row index is not valid for this matrix.
+   */
+  @SuppressWarnings({ "unchecked" })
+  void insertRowUnchecked(int row, T[] vals) {
+    if (row < 0 || row > this.height()) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Row index "
+                      + row
+                      + " not valid for Matrix of height "
+                      + this.height()
+      );
+    } // if
+
+    T[] newBacking = (T[]) new Object[this.backing.length + this.width()];
+
+    int numBefore = row == this.height() ? this.backing.length : this.getIndex(row, 0);
+
+    System.arraycopy(
+            this.backing,
+            0,
+            newBacking,
+            0,
+            numBefore
+    );
+    System.arraycopy(
+            this.backing,
+            numBefore,
+            newBacking,
+            numBefore + this.width(),
+            newBacking.length - numBefore - this.width()
+    );
+
+    this.backing = newBacking;
+    this.height++;
+
+    for (int i = 0; i < this.width(); i++) {
+      this.set(row, i, vals[i]);
+    } // for
+  } // insertRowUnchecked(int, T[])
+
+  /**
+   * This method inserts a column into the array at position col.
+   * It fills the inserted column with values from vals.
+   * Calls to this method are only valid if the length of vals is
+   * equal to the height of the matrix.
+   * @param col The position at which to insert the column.
+   * @param vals The values with which to fill the column.
+   *
+   * @throws IndexOutOfBoundsException
+   *   This is thrown if the column index is
+   *   not valid for this matrix.
+   */
+  @SuppressWarnings({ "unchecked" })
+  void insertColUnchecked(int col, T[] vals) {
+    if (col < 0 || col > this.width()) {
+      throw new IndexOutOfBoundsException(
+              "Column index "
+                      + col
+                      + " is not appropriate for Matrix of width "
+                      + this.width()
+      );
+    } // if
+
+    T[] newBacking = (T[]) new Object[this.backing.length + this.height()];
+
+    for (int i = 0; i < this.height(); i++) {
+      System.arraycopy(
+              this.backing,
+              i * this.width(),
+              newBacking,
+              i * this.width() + i,
+              col
+      );
+      System.arraycopy(
+              this.backing,
+              i * this.width() + col,
+              newBacking,
+              i * this.width() + i + col + 1,
+              this.width() - col
+      );
+    } // for
+
+    this.backing = newBacking;
+    this.width++;
+
+    for (int i = 0; i < this.height(); i++) {
+      this.set(i, col, vals[i]);
+    } // for
+  } // insertColUnchecked(int, T[])
 } // class MatrixV0
