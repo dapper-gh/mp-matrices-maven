@@ -323,17 +323,33 @@ public class MatrixV0<T> implements Matrix<T> {
    */
   public void fillRegion(int startRow, int startCol, int endRow, int endCol,
       T val) {
-    if (endRow > this.height()) {
+    if (startRow >= this.height() || startRow < 0) {
       throw new ArrayIndexOutOfBoundsException(
-              "Row index "
+              "Start row index"
+              + startRow
+              + " is not appropriate for matrix of height "
+              + this.height()
+      );
+    } // if
+    if (startCol >= this.width() || startCol < 0) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Start column index"
+                      + startCol
+                      + " is not appropriate for matrix of width "
+                      + this.width()
+      );
+    } // if
+    if (endRow > this.height() || endRow < 0) {
+      throw new ArrayIndexOutOfBoundsException(
+              "End row index "
               + endRow
               + " is not appropriate for matrix of height "
               + this.height()
       );
     } // if
-    if (endCol > this.width()) {
+    if (endCol > this.width() || endCol < 0) {
       throw new ArrayIndexOutOfBoundsException(
-              "Column index "
+              "End column index "
               + endCol
               + " is not appropriate for matrix of width "
               + this.width()
@@ -370,7 +386,7 @@ public class MatrixV0<T> implements Matrix<T> {
    */
   public void fillLine(int startRow, int startCol, int deltaRow, int deltaCol,
       int endRow, int endCol, T val) {
-    if (endRow > this.height()) {
+    if (endRow > this.height() || endRow < -1) {
       throw new ArrayIndexOutOfBoundsException(
               "Row index "
                       + endRow
@@ -378,7 +394,7 @@ public class MatrixV0<T> implements Matrix<T> {
                       + this.height()
       );
     } // if
-    if (endCol > this.width()) {
+    if (endCol > this.width() || endCol < -1) {
       throw new ArrayIndexOutOfBoundsException(
               "Column index "
                       + endCol
@@ -386,8 +402,27 @@ public class MatrixV0<T> implements Matrix<T> {
                       + this.width()
       );
     } // if
+    if (deltaCol * (endCol - startCol) < 0) {
+      throw new ArrayIndexOutOfBoundsException(
+              "End column "
+              + endCol
+              + " is before start column "
+              + startCol
+      );
+    } // if
+    if (deltaRow * (endRow - startRow) < 0) {
+      throw new ArrayIndexOutOfBoundsException(
+              "End row "
+              + endRow
+              + " is before start row "
+              + startRow
+      );
+    } // if
 
-    for (int i = startRow, j = startCol; i < endRow && j < endCol; i += deltaRow, j += deltaCol) {
+    for (int i = startRow, j = startCol;
+         this.isWithin(startRow, endRow, i)
+            && this.isWithin(startCol, endCol, j);
+         i += deltaRow, j += deltaCol) {
       this.set(i, j, val);
     } // for
   } // fillLine(int, int, int, int, int, int, T)
@@ -618,4 +653,19 @@ public class MatrixV0<T> implements Matrix<T> {
       this.set(i, col, vals[i]);
     } // for
   } // insertColUnchecked(int, T[])
+
+  /**
+   * This method calculates whether an index is inside a [start, end) range.
+   * @param start The beginning of the range.
+   * @param end The end of the range.
+   * @param index The index being tested.
+   * @return Whether the index is in the range.
+   */
+  boolean isWithin(int start, int end, int index) {
+    if (start < end) {
+      return start <= index && index < end;
+    } else {
+      return end < index && index <= start;
+    } // if-else
+  } // isWithin(int, int, int)
 } // class MatrixV0
