@@ -19,6 +19,6 @@ Citations:
 
 ---
 
-This code may be found at <https://github.com/USERID/mp-matrices-maven>. 
+This code may be found at <https://github.com/dapper-gh/mp-matrices-maven>. 
 
 The original code may be found at <https://github.com/Grinnell-CSC207/mp-matrices-maven>.
