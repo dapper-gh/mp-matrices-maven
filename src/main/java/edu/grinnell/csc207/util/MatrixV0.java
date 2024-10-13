@@ -323,6 +323,23 @@ public class MatrixV0<T> implements Matrix<T> {
    */
   public void fillRegion(int startRow, int startCol, int endRow, int endCol,
       T val) {
+    if (endRow > this.height()) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Row index "
+              + endRow
+              + " is not appropriate for matrix of height "
+              + this.height()
+      );
+    } // if
+    if (endCol > this.width()) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Column index "
+              + endCol
+              + " is not appropriate for matrix of width "
+              + this.width()
+      );
+    } // if
+
     for (int i = startRow; i < endRow; i++) {
       for (int j = startCol; j < endCol; j++) {
         this.set(i, j, val);
@@ -353,6 +370,23 @@ public class MatrixV0<T> implements Matrix<T> {
    */
   public void fillLine(int startRow, int startCol, int deltaRow, int deltaCol,
       int endRow, int endCol, T val) {
+    if (endRow > this.height()) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Row index "
+                      + endRow
+                      + " is not appropriate for matrix of height "
+                      + this.height()
+      );
+    } // if
+    if (endCol > this.width()) {
+      throw new ArrayIndexOutOfBoundsException(
+              "Column index "
+                      + endCol
+                      + " is not appropriate for matrix of width "
+                      + this.width()
+      );
+    } // if
+
     for (int i = startRow, j = startCol; i < endRow && j < endCol; i += deltaRow, j += deltaCol) {
       this.set(i, j, val);
     } // for
