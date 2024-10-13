@@ -1,8 +1,5 @@
 package edu.grinnell.csc207.util;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 /**
  * An implementation of two-dimensional matrices.
  *
@@ -17,9 +14,21 @@ public class MatrixV0<T> implements Matrix<T> {
   // | Fields |
   // +--------+
 
+  /**
+   * This is the array that contains all the elements of the matrix.
+   */
   T[] backing;
+  /**
+   * This is the width of the matrix.
+   */
   int width;
+  /**
+   * This is the height of the matrix.
+   */
   int height;
+  /**
+   * This is the default value passed to the constructor.
+   */
   T defaultValue;
 
   // +--------------+------------------------------------------------
@@ -30,9 +39,9 @@ public class MatrixV0<T> implements Matrix<T> {
    * Create a new matrix of the specified width and height with the
    * given value as the default.
    *
-   * @param width
+   * @param width1
    *   The width of the matrix.
-   * @param height
+   * @param height1
    *   The height of the matrix.
    * @param def
    *   The default value, used to fill all the cells.
@@ -40,8 +49,8 @@ public class MatrixV0<T> implements Matrix<T> {
    * @throws NegativeArraySizeException
    *   If either the width or height are negative.
    */
-  public MatrixV0(int width, int height, T def) {
-    this(width, height);
+  public MatrixV0(int width1, int height1, T def) {
+    this(width1, height1);
     this.defaultValue = def;
     for (int i = 0; i < this.height(); i++) {
       for (int j = 0; j < this.width(); j++) {
@@ -54,25 +63,25 @@ public class MatrixV0<T> implements Matrix<T> {
    * Create a new matrix of the specified width and height with
    * null as the default value.
    *
-   * @param width
+   * @param width1
    *   The width of the matrix.
-   * @param height
+   * @param height1
    *   The height of the matrix.
    *
    * @throws NegativeArraySizeException
    *   If either the width or height are negative.
    */
   @SuppressWarnings({ "unchecked" })
-  public MatrixV0(int width, int height) {
-    if (width < 0) {
+  public MatrixV0(int width1, int height1) {
+    if (width1 < 0) {
       throw new NegativeArraySizeException("Negative width given to MatrixV0 constructor");
     } // if
-    if (height < 0) {
+    if (height1 < 0) {
       throw new NegativeArraySizeException("Negative height given to MatrixV0 constructor");
     } // if
 
-    this.width = width;
-    this.height = height;
+    this.width = width1;
+    this.height = height1;
     this.backing = (T[]) new Object[this.getExpectedSize()];
   } // MatrixV0
 
@@ -146,7 +155,7 @@ public class MatrixV0<T> implements Matrix<T> {
       this.insertRow(row, this.defaultRun(this.width()));
     } catch (ArraySizeException err) {
       // This will never happen, so we will fail silently.
-    }
+    } // try-catch
   } // insertRow(int)
 
   /**
@@ -174,7 +183,12 @@ public class MatrixV0<T> implements Matrix<T> {
     } // if
 
     if (row < 0 || row > this.height()) {
-      throw new ArrayIndexOutOfBoundsException("Row index " + row + " not valid for Matrix of height " + this.height());
+      throw new ArrayIndexOutOfBoundsException(
+              "Row index "
+                      + row
+                      + " not valid for Matrix of height "
+                      + this.height()
+      );
     } // if
 
     T[] newBacking = (T[]) new Object[this.getExpectedSize() + this.width()];
@@ -218,7 +232,7 @@ public class MatrixV0<T> implements Matrix<T> {
       this.insertCol(col, this.defaultRun(this.height()));
     } catch (ArraySizeException err) {
       // This will never happen, so we will fail silently.
-    }
+    } // try-catch
   } // insertCol(int)
 
   /**
@@ -237,11 +251,21 @@ public class MatrixV0<T> implements Matrix<T> {
   @SuppressWarnings({ "unchecked" })
   public void insertCol(int col, T[] vals) throws ArraySizeException {
     if (vals.length != this.height()) {
-      throw new ArraySizeException("Array of length " + vals.length + " is not appropriate for Matrix of height " + this.height());
-    }
+      throw new ArraySizeException(
+              "Array of length "
+                      + vals.length
+                      + " is not appropriate for Matrix of height "
+                      + this.height()
+      );
+    } // if
 
     if (col < 0 || col > this.width()) {
-      throw new IndexOutOfBoundsException("Column index " + col + " is not appropriate for Matrix of width " + this.width());
+      throw new IndexOutOfBoundsException(
+              "Column index "
+                      + col
+                      + " is not appropriate for Matrix of width "
+                      + this.width()
+      );
     } // if
 
     T[] newBacking = (T[]) new Object[this.getExpectedSize() + this.height()];
@@ -283,7 +307,12 @@ public class MatrixV0<T> implements Matrix<T> {
   @SuppressWarnings({ "unchecked" })
   public void deleteRow(int row) {
     if (row < 0 || row >= this.height()) {
-      throw new IndexOutOfBoundsException("Row index " + row + " is not valid for Matrix of height " + this.height());
+      throw new IndexOutOfBoundsException(
+              "Row index "
+                      + row
+                      + " is not valid for Matrix of height "
+                      + this.height()
+      );
     } // if
 
     T[] newBacking = (T[]) new Object[this.getExpectedSize() - this.width()];
@@ -320,7 +349,12 @@ public class MatrixV0<T> implements Matrix<T> {
   @SuppressWarnings({ "unchecked" })
   public void deleteCol(int col) {
     if (col < 0 || col >= this.width()) {
-      throw new IndexOutOfBoundsException("Column index " + col + " not appropriate for Matrix of width " + this.width());
+      throw new IndexOutOfBoundsException(
+              "Column index "
+                      + col
+                      + " not appropriate for Matrix of width "
+                      + this.width()
+      );
     } // if
 
     T[] newBacking = (T[]) new Object[this.getExpectedSize() - this.height()];
@@ -475,26 +509,41 @@ public class MatrixV0<T> implements Matrix<T> {
   } // hashCode()
 
   /**
-   * This method calculates the index into the backing array required to access the index (row, col).
+   * This method calculates the index into the backing array
+   * required to access the index (row, col).
+   *
    * @param row The row wanted.
    * @param col The column wanted.
    * @return The index of the backing array needed to access (row, col).
    *
-   * @throws ArrayIndexOutOfBoundsException This exception is thrown if either the row or column are invalid for this array at the current size.
+   * @throws ArrayIndexOutOfBoundsException
+   *   This exception is thrown if either the row or column are
+   *   invalid for this array at the current size.
    */
   int getIndex(int row, int col) {
     if (row >= this.height()) {
-      throw new ArrayIndexOutOfBoundsException("Row index " + row + " not valid for Matrix of height " + this.height());
+      throw new ArrayIndexOutOfBoundsException(
+              "Row index "
+                      + row
+                      + " not valid for Matrix of height "
+                      + this.height()
+      );
     } // if
     if (col >= this.width()) {
-      throw new ArrayIndexOutOfBoundsException("Column index " + col + " not valid for Matrix of width " + this.width());
+      throw new ArrayIndexOutOfBoundsException(
+              "Column index "
+                      + col
+                      + " not valid for Matrix of width "
+                      + this.width()
+      );
     } // if
 
     return row * this.width() + col;
   } // getIndex(int, int)
 
   /**
-   * This method calculates the appropriate length of the backing array, given the width and height of this matrix.
+   * This method calculates the appropriate length of the backing array,
+   * given the width and height of this matrix.
    * @return The expected size of the backing array.
    */
   int getExpectedSize() {
@@ -502,7 +551,8 @@ public class MatrixV0<T> implements Matrix<T> {
   } // getExpectedSize()
 
   /**
-   * This method creates an array of length len with every index set to the default value of this matrix.
+   * This method creates an array of length len
+   * with every index set to the default value of this matrix.
    *
    * @param len The length of the array to create.
    *
@@ -515,5 +565,5 @@ public class MatrixV0<T> implements Matrix<T> {
       arr[i] = this.defaultValue;
     } // for
     return arr;
-  }
+  } // defaultRun(int)
 } // class MatrixV0
