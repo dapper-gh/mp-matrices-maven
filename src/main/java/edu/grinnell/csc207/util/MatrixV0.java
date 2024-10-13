@@ -434,7 +434,13 @@ public class MatrixV0<T> implements Matrix<T> {
 
     for (int i = 0; i < this.height(); i++) {
       for (int j = 0; j < this.width(); j++) {
-        if (!this.get(i, j).equals(other.get(i, j))) {
+        T thisVal = this.get(i, j);
+        Object otherVal = other.get(i, j);
+        if (thisVal == null) {
+          if (otherVal != null) {
+            return false;
+          } // if
+        } else if (!thisVal.equals(otherVal)) {
           return false;
         } // if
       } // for
