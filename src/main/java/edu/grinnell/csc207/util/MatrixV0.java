@@ -400,7 +400,7 @@ public class MatrixV0<T> implements Matrix<T> {
    * @return a copy of the matrix.
    */
   public Matrix<T> clone() {
-    MatrixV0<T> cloned = new MatrixV0<>(this.width(), this.height());
+    MatrixV0<T> cloned = new MatrixV0<>(this.width(), this.height(), this.defaultValue);
     for (int i = 0; i < this.height(); i++) {
       for (int j = 0; j < this.width(); j++) {
         cloned.set(i, j, this.get(i, j));
