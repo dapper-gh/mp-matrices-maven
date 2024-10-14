@@ -520,7 +520,7 @@ public class MatrixV0<T> implements Matrix<T> {
    *   invalid for this array at the current size.
    */
   int getIndex(int row, int col) {
-    if (row >= this.height()) {
+    if (row >= this.height() || row < 0) {
       throw new ArrayIndexOutOfBoundsException(
               "Row index "
                       + row
@@ -528,7 +528,7 @@ public class MatrixV0<T> implements Matrix<T> {
                       + this.height()
       );
     } // if
-    if (col >= this.width()) {
+    if (col >= this.width() || col < 0) {
       throw new ArrayIndexOutOfBoundsException(
               "Column index "
                       + col
